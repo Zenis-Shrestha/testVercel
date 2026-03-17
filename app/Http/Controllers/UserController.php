@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -16,18 +17,24 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'age' => 'nullable|integer|min:0|max:150',
+            // 'age' => 'required|integer|min:0|max:150',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
-            // 'role'=>''
+            'display_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
+        $path = null;
 
+        if ($request->hasFile('display_image')) {
+            $path = $request->file('display_image')->store('display_images', 'public'); // display_images/xxx.png
+        }
         $user = User::create([
             'name' => $validated['name'],
-            'age' => $validated['age'],
+        //    'age' => $validated['age'],
             'email' => $validated['email'],
+            'display_image' => $path,
             'password' => Hash::make($validated['password']),
         ]);
 
@@ -39,30 +46,29 @@ class UserController extends Controller
         return response()->json(User::findOrFail($id));
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, $user)
     {
-        $user = User::findOrFail($id);
-
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'age' => 'nullable|integer|min:0|max:150',
-            'email' => ['required','email', Rule::unique('users')->ignore($user->id)],
-            'password' => 'nullable|min:6|confirmed',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'display_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
-        $user->name = $validated['name'];
-        $user->age = $validated['age'];
-        $user->email = $validated['email'];
+        if ($request->hasFile('display_image')) {
+            // delete old
+            if ($user->display_image) {
+                Storage::disk('public')->delete($user->display_image);
+            }
 
-        if ($request->filled('password')) {
-            $user->password = Hash::make($validated['password']);
+            $user->display_image = $request->file('display_image')->store('display_images', 'public');
         }
 
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
         $user->save();
 
         return response()->json($user);
     }
-
     public function destroy(string $id)
     {
         User::findOrFail($id)->delete();

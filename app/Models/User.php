@@ -7,22 +7,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
+     use HasRoles;
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable,HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+ protected $fillable = [
+    'name',
+    // 'age',
+    'email',
+    'password',
+    'display_image',
+];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,5 +49,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    protected $appends = ['display_image_url'];
+
+    public function getDisplayImageUrlAttribute()
+    {
+        return $this->display_image ? asset('storage/' . $this->display_image) : null;
     }
 }
