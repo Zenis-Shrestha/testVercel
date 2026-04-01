@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\LogsActivity;
 
 class UserController extends Controller
 {
+    use LogsActivity;
     public function index()
     {
         return response()->json(User::all());
@@ -32,11 +34,17 @@ class UserController extends Controller
         }
         $user = User::create([
             'name' => $validated['name'],
-        //    'age' => $validated['age'],
+            //    'age' => $validated['age'],
             'email' => $validated['email'],
             'display_image' => $path,
             'password' => Hash::make($validated['password']),
         ]);
+        $this->logActivity(
+            action: 'created',
+            description: auth()->user()->name . ' created user ' . $user->name,
+            model: 'User',
+            modelId: $user->id
+        );
 
         return response()->json($user, 201);
     }
@@ -46,7 +54,7 @@ class UserController extends Controller
         return response()->json(User::findOrFail($id));
     }
 
-  public function update(Request $request, User $user)
+    public function update(Request $request, User $user)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -66,13 +74,31 @@ class UserController extends Controller
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->save();
+        $user->save();
+
+        // ✅ add this
+        $this->logActivity(
+            action: 'updated',
+            description: auth()->user()->name . ' updated user ' . $user->name,
+            model: 'User',
+            modelId: $user->id
+        );
 
         return response()->json($user);
+
+
     }
     public function destroy(string $id)
     {
-        User::findOrFail($id)->delete();
+        $user = User::findOrFail($id);
 
+        $this->logActivity(
+            action: 'deleted',
+            description: auth()->user()->name . ' deleted user with id ' . $id,
+            model: 'User',
+            modelId: $id
+        );
+        $user->delete();
         return response()->json(['message' => 'User deleted']);
     }
 }

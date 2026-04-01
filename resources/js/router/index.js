@@ -10,6 +10,7 @@ import Aboutme from '../views/Aboutme.vue';
 import Chat from '../views/Chat.vue';
 import UserEdit from '../views/User/Edit.vue';
 import UserDetails from '../views/User/Details.vue';
+import ActivityLog from '../views/ActivityLog.vue';
 
 const routes = [
     {
@@ -70,6 +71,14 @@ const routes = [
         component: UserDetails,
         meta: { requiresAuth: true }
     },
+    {
+    path: '/activity-logs',
+    name: 'ActivityLog',
+    component: ActivityLog,
+    meta: { requiresAuth: true }
+},
+
+
 ];
 
 const router = createRouter({

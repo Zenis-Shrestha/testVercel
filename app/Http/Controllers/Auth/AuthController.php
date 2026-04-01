@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Models\ActivityLog;
 
 class AuthController extends Controller
 {
@@ -59,7 +60,13 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('web')->plainTextToken;
-
+        // ✅ add this after successful login
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'action' => 'login',
+            'description' => $user->name . ' logged in',
+            'ip_address' => $request->ip(),
+        ]);
         return response()->json([
             'message' => 'Logged in successfully',
             'user' => $user,
@@ -76,7 +83,12 @@ class AuthController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+         ActivityLog::create([
+        'user_id'     => auth()->id(),
+        'action'      => 'logout',
+        'description' => auth()->user()->name . ' logged out',
+        'ip_address'  => $request->ip(),
+    ]);
         return response()->json([
             'message' => 'Logged out successfully',
         ]);

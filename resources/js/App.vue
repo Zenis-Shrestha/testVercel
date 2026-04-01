@@ -30,6 +30,12 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                         Chat
                     </router-link>
+
+
+                    <router-link to="/activity-logs" class="nav-link">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 16h-1v-4h-1m1-4H8m7 4h-1v-4h-1m1-4h-4m0 8h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                        Activity Log
+                    </router-link>
                 </div>
 
                 <!-- Right: user + logout -->
